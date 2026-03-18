@@ -7,17 +7,27 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@400;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #00ff41; --accent: #ff003c; }
-        body { font-family: 'Noto Sans TC', 'Orbitron', sans-serif; background-color: #050505; color: white; overflow: hidden; height: 100vh; }
-        .mode-worker { --primary: #00ff41; --accent: #ff003c; }
-        .mode-student { --primary: #00d4ff; --accent: #ffee00; }
-        .neon-border { border: 3px solid var(--primary); box-shadow: 0 0 20px var(--primary); }
-        .neon-text { text-shadow: 0 0 10px var(--primary); color: var(--primary); }
+        /* 這裡定義預設顏色 (社畜模式) */
+        :root { 
+            --primary: #00ff41; 
+            --accent: #ff003c; 
+        }
+        
+        /* 當 body 有特定 class 時，強制覆蓋變數 */
+        body.mode-worker { --primary: #00ff41; --accent: #ff003c; }
+        body.mode-student { --primary: #00d4ff; --accent: #ffee00; }
+
+        body { font-family: 'Noto Sans TC', 'Orbitron', sans-serif; background-color: #050505; color: white; overflow: hidden; height: 100vh; transition: all 0.3s ease; }
+        
+        .neon-border { border: 3px solid var(--primary); box-shadow: 0 0 20px var(--primary); transition: all 0.3s ease; }
+        .neon-text { text-shadow: 0 0 10px var(--primary); color: var(--primary); transition: all 0.3s ease; }
+        
         .slot-window { height: 100px; overflow: hidden; position: relative; background: rgba(0,0,0,0.9); }
         .slot-reel { display: flex; flex-direction: column; transition: transform 3s cubic-bezier(0.15, 0, 0.15, 1); }
         .slot-item { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 900; text-align: center; width: 100%; padding: 0 20px; }
-        .cyber-btn { background-color: var(--primary); color: #000; font-weight: 900; clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%); transition: all 0.2s; cursor: pointer; border: none; }
-        .action-btn { background-color: transparent; border: 3px solid var(--primary); box-shadow: 0 0 10px var(--primary); color: white; font-weight: 900; transition: all 0.2s; }
+        
+        .cyber-btn { background-color: var(--primary); color: #000; font-weight: 900; clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%); transition: all 0.3s ease; cursor: pointer; border: none; }
+        .action-btn { background-color: transparent; border: 3px solid var(--primary); box-shadow: 0 0 10px var(--primary); color: white; font-weight: 900; transition: all 0.3s ease; }
         .action-btn:hover { background-color: var(--primary); color: #000; }
         .cyber-btn:disabled { background-color: #333; color: #666; cursor: not-allowed; box-shadow: none; border: 3px solid #444; }
     </style>
@@ -148,7 +158,6 @@
             actions.classList.add('hidden');
             comment.innerText = "正在決定...";
 
-            // 洗牌隨機順序
             let shuffledOptions = [...fakeOptions].sort(() => Math.random() - 0.5); 
 
             let reelHTML = "";
@@ -204,6 +213,7 @@
 
         function updateUI() {
             const modeTextEl = document.getElementById('mode-text');
+            // 切換 body 的 class，讓 CSS 變數跟著切換
             document.body.className = `mode-${currentMode} flex flex-col items-center justify-center p-6`;
             modeTextEl.innerText = currentMode === 'worker' ? '社畜模式' : '可悲學生';
         }
