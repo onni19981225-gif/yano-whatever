@@ -10,7 +10,7 @@
         :root { --primary: #00ff41; --accent: #ff003c; }
         body { font-family: 'Noto Sans TC', 'Orbitron', sans-serif; background-color: #050505; color: white; overflow: hidden; height: 100vh; }
         .mode-worker { --primary: #00ff41; --accent: #ff003c; }
-        .mode-student { --primary: #00d4ff; --accent: #ffee00; }
+        .mode-可悲學生 { --primary: #00d4ff; --accent: #ffee00; }
         .neon-border { border: 3px solid var(--primary); box-shadow: 0 0 20px var(--primary); }
         .neon-text { text-shadow: 0 0 10px var(--primary); color: var(--primary); }
         .slot-window { height: 100px; overflow: hidden; position: relative; background: rgba(0,0,0,0.9); }
@@ -26,7 +26,7 @@
 
     <div class="w-full max-w-sm flex justify-between items-end mb-8">
         <div class="text-left">
-            <div id="mode-text" class="neon-text font-bold text-sm tracking-tighter uppercase">MODE: CORPORATE_SLAVE</div>
+            <div id="mode-text" class="neon-text font-bold text-sm tracking-tighter uppercase">MODE: 社畜模式</div>
             <div id="count-display" class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest text-left">Scanning nearby...</div>
         </div>
         <button onclick="toggleMode()" class="text-[10px] border-2 border-gray-600 px-3 py-1 hover:bg-white hover:text-black transition-all font-bold">身分切換</button>
@@ -206,7 +206,7 @@
 
         function updateUI() {
             document.body.className = `mode-${currentMode} flex flex-col items-center justify-center p-6`;
-            document.getElementById('mode-text').innerText = currentMode === 'worker' ? 'MODE: CORPORATE_SLAVE' : 'MODE: BROKE_STUDENT';
+            document.getElementById('mode-text').innerText = currentMode === 'worker' ? 'MODE: 社畜模式' : 'MODE: 可悲學生';
         }
     </script>
 </body>
