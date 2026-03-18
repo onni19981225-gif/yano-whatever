@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隨便，都可以 | Cyberpunk Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@400;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #00ff41; --accent: #ff003c; }
+        body { font-family: 'Noto Sans TC', 'Orbitron', sans-serif; background-color: #050505; color: white; overflow: hidden; height: 100vh; }
+        .mode-worker { --primary: #00ff41; --accent: #ff003c; }
+        .mode-student { --primary: #00d4ff; --accent: #ffee00; }
+        .neon-border { border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); }
+        .neon-text { text-shadow: 0 0 8px var(--primary); color: var(--primary); }
+        .slot-window { height: 100px; overflow: hidden; position: relative; background: rgba(0,0,0,0.8); }
+        .slot-reel { display: flex; flex-direction: column; transition: transform 3s cubic-bezier(0.15, 0, 0.15, 1); }
+        .slot-item { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 900; text-align: center; width: 100%; padding: 0 20px; }
+        .cyber-btn { background-color: var(--primary); color: #000; font-weight: 900; clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%); transition: all 0.2s; cursor: pointer; }
+        .cyber-btn:disabled { background-color: #333; color: #666; cursor: not-allowed; }
+    </style>
+</head>
+<body class="mode-worker flex flex-col items-center justify-center p-6">
+
+    <div class="w-full max-w-sm flex justify-between items-end mb-8">
+        <div>
+            <div id="mode-text" class="neon-text font-bold text-sm tracking-tighter">MODE: CORPORATE_SLAVE</div>
+            <div id="count-display" class="text-[10px] text-gray-500 mt-1 uppercase">Scanning area...</div>
+        </div>
+        <button onclick="toggleMode()" class="text-[10px] border border-gray-600 px-3 py-1 hover:bg-white hover:text-black transition-all">身分切換</button>
+    </div>
+
+    <main class="w-full max-w-sm text-center">
+        <h1 class="text-4xl font-black italic mb-1 neon-text">隨便，都可以</h1>
+        <p class="text-gray-600 text-[10px] mb-8 tracking-[0.3em]">DESTINY RANDOMIZER</p>
+
+        <div class="neon-border relative p-1 bg-black">
+            <div class="slot-window border-y border-gray-900">
+                <div id="reel" class="slot-reel">
+                    <div class="slot-item text-xs">等待定位...</div>
+                </div>
+            </div>
+        </div>
+
+        <button id="spin-btn" onclick="startSpin()" disabled class="cyber-btn w-full py-5 mt-8 text-xl tracking-widest">
+            正在初始化...
+        </button>
+
+        <div id="result-actions" class="mt-6 flex gap-2 hidden">
+            <a id="maps-url" href="#" target="_blank" class="flex-1 bg-gray-900 border border-blue-500 text-[10px] py-2 text-blue-400">📍 導航</a>
+            <button onclick="copyToClipboard()" class="flex-1 bg-gray-900 border border-gray-600 text-[10px] py-2 text-gray-300">一鍵甩鍋 (複製)</button>
+        </div>
+
+        <p id="ai-comment" class="mt-6 text-sm text-gray-400 italic min-h-[4em] px-4 leading-relaxed"></p>
+    </main>
+
+    <script>
+        // 【商科生填空】請貼入你的 Key
+        const GEMINI_API_KEY = "AIzaSyDQnH5NN0wN0J0zT2FVHtM5sp5Hm8gGKz8"; 
+
+        let currentMode = localStorage.getItem('userMode') || 'worker';
+        let nearbyRestaurants = [];
+        let isSpinning = false;
+        let lastResult = { name: "", insult: "", url: "" };
+
+        window.onload = () => {
+            updateUI();
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(fetchNearby, () => {
+                    alert("請開啟定位授權，不然我不知道你在哪裡吃土。");
+                });
+            }
+        };
+
+        async function fetchNearby(position) {
+            const { latitude, longitude } = position.coords;
+            const statusLabel = document.getElementById('count-display');
+            const btn = document.getElementById('spin-btn');
+            
+            try {
+                const query = `[out:json];node["amenity"~"restaurant|fast_food|cafe"](around:1000,${latitude},${longitude});out;`;
+                const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                nearbyRestaurants = data.elements
+                    .map(e => ({ name: e.tags.name, lat: e.lat, lon: e.lon }))
+                    .filter(r => r.name);
+
+                statusLabel.innerText = `發現附近有 ${nearbyRestaurants.length} 間餐廳`;
+                document.getElementById('reel').innerHTML = `<div class="slot-item text-sm">數據加載成功</div>`;
+                btn.disabled = false;
+                btn.innerText = "尋找覓食處";
+            } catch (error) {
+                statusLabel.innerText = "數據連線失敗";
+            }
+        }
+
+        async function startSpin() {
+            if (isSpinning || nearbyRestaurants.length === 0) return;
+            isSpinning = true;
+
+            const btn = document.getElementById('spin-btn');
+            const reel = document.getElementById('reel');
+            const comment = document.getElementById('ai-comment');
+            const actions = document.getElementById('result-actions');
+
+            btn.disabled = true;
+            btn.innerText = "正在決定...";
+            actions.classList.add('hidden');
+            comment.innerText = "AI 正在思考如何羞辱你...";
+
+            let reelHTML = "";
+            for(let i=0; i<15; i++) {
+                const randomName = nearbyRestaurants[Math.floor(Math.random() * nearbyRestaurants.length)].name;
+                reelHTML += `<div class="slot-item opacity-30 text-xs">${randomName}</div>`;
+            }
+            const final = nearbyRestaurants[Math.floor(Math.random() * nearbyRestaurants.length)];
+            reelHTML += `<div class="slot-item text-yellow-400 font-black">${final.name}</div>`;
+            
+            reel.innerHTML = reelHTML;
+            reel.style.transition = "none";
+            reel.style.transform = "translateY(0)";
+            reel.offsetHeight; 
+
+            reel.style.transition = "transform 3s cubic-bezier(0.15, 0, 0.15, 1)";
+            reel.style.transform = `translateY(-${15 * 100}px)`;
+
+            const insult = await getGeminiInsult(final.name);
+
+            setTimeout(() => {
+                isSpinning = false;
+                btn.disabled = false;
+                btn.innerText = "再抽一次";
+                comment.innerText = insult;
+                
+                const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(final.name)}&query_place_id=${final.lat},${final.lon}`;
+                document.getElementById('maps-url').href = mapLink;
+                actions.classList.remove('hidden');
+                
+                lastResult = { name: final.name, insult: insult, url: mapLink };
+            }, 3000);
+        }
+
+        async function getGeminiInsult(restaurant) {
+            const prompt = `你是一個極度毒舌且厭世的AI。現在使用者是「${currentMode === 'worker' ? '社畜' : '學生'}」，他抽到了午餐吃「${restaurant}」。請針對身分與食物噴他一句話，30字內，夠酸、夠有梗。`;
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.95 }
+                    })
+                });
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch (e) { return "連 AI 都懶得理你。"; }
+        }
+
+        function copyToClipboard() {
+            const text = `【隨便，都可以】命運抽籤結果：\n身分：${currentMode === 'worker' ? '社畜' : '學生'}\n餐廳：${lastResult.name}\nAI 評價：${lastResult.insult}\n地圖：${lastResult.url}`;
+            navigator.clipboard.writeText(text).then(() => alert("已複製！快去 Line 群組甩鍋吧。"));
+        }
+
+        function toggleMode() {
+            if(isSpinning) return;
+            currentMode = currentMode === 'worker' ? 'student' : 'worker';
+            localStorage.setItem('userMode', currentMode);
+            updateUI();
+        }
+
+        function updateUI() {
+            document.body.className = `mode-${currentMode} flex flex-col items-center justify-center p-6`;
+            document.getElementById('mode-text').innerText = currentMode === 'worker' ? 'MODE: CORPORATE_SLAVE' : 'MODE: BROKE_STUDENT';
+        }
+    </script>
+</body>
+</html>
