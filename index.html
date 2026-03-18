@@ -10,7 +10,7 @@
         :root { --primary: #00ff41; --accent: #ff003c; }
         body { font-family: 'Noto Sans TC', 'Orbitron', sans-serif; background-color: #050505; color: white; overflow: hidden; height: 100vh; }
         .mode-worker { --primary: #00ff41; --accent: #ff003c; }
-        .mode-可悲學生 { --primary: #00d4ff; --accent: #ffee00; }
+        .mode-student { --primary: #00d4ff; --accent: #ffee00; }
         .neon-border { border: 3px solid var(--primary); box-shadow: 0 0 20px var(--primary); }
         .neon-text { text-shadow: 0 0 10px var(--primary); color: var(--primary); }
         .slot-window { height: 100px; overflow: hidden; position: relative; background: rgba(0,0,0,0.9); }
@@ -26,7 +26,7 @@
 
     <div class="w-full max-w-sm flex justify-between items-end mb-8">
         <div class="text-left">
-            <div id="mode-text" class="neon-text font-bold text-sm tracking-tighter uppercase">MODE: 社畜模式</div>
+            <div id="mode-text" class="neon-text font-bold text-sm tracking-tighter uppercase">社畜模式</div>
             <div id="count-display" class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest text-left">Scanning nearby...</div>
         </div>
         <button onclick="toggleMode()" class="text-[10px] border-2 border-gray-600 px-3 py-1 hover:bg-white hover:text-black transition-all font-bold">身分切換</button>
@@ -83,7 +83,6 @@
         let isSpinning = false;
         let lastResult = { name: "", url: "" };
 
-        // 頁面載入後立即請求定位
         window.onload = () => {
             updateUI();
             const statusLabel = document.getElementById('count-display');
@@ -95,7 +94,7 @@
                     (err) => { 
                         statusLabel.innerText = "定位授權失敗";
                         statusLabel.classList.add('text-red-500');
-                        reelStatus.innerText = "請開啟定位授權，不然我不知道你要吃哪邊的土";
+                        reelStatus.innerText = "開定位，不然我不知道你要吃哪邊的土...";
                         reelStatus.style.fontSize = "14px";
                         reelStatus.classList.add('text-red-500');
                         document.getElementById('spin-btn').innerText = "定位已關閉";
@@ -135,7 +134,6 @@
             }
         }
 
-        // 修正後的 startSpin，移除多餘的嵌套
         function startSpin() {
             if (isSpinning || nearbyRestaurants.length === 0) return;
             isSpinning = true;
@@ -150,7 +148,7 @@
             actions.classList.add('hidden');
             comment.innerText = "正在決定...";
 
-            // 洗牌邏輯
+            // 洗牌隨機順序
             let shuffledOptions = [...fakeOptions].sort(() => Math.random() - 0.5); 
 
             let reelHTML = "";
@@ -205,8 +203,9 @@
         }
 
         function updateUI() {
+            const modeTextEl = document.getElementById('mode-text');
             document.body.className = `mode-${currentMode} flex flex-col items-center justify-center p-6`;
-            document.getElementById('mode-text').innerText = currentMode === 'worker' ? 'MODE: 社畜模式' : 'MODE: 可悲學生';
+            modeTextEl.innerText = currentMode === 'worker' ? '社畜模式' : '可悲學生';
         }
     </script>
 </body>
