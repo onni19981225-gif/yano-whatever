@@ -7,18 +7,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@400;900&display=swap" rel="stylesheet">
     <style>
-        /* 這裡定義預設顏色 (社畜模式) */
-        :root { 
-            --primary: #00ff41; 
-            --accent: #ff003c; 
-        }
+        /* 強制顏色變數定義 */
+        :root { --primary: #00ff41; --accent: #ff003c; }
         
-        /* 當 body 有特定 class 時，強制覆蓋變數 */
+        /* 當 body 為不同模式時，強制改變變數值 */
         body.mode-worker { --primary: #00ff41; --accent: #ff003c; }
         body.mode-student { --primary: #00d4ff; --accent: #ffee00; }
 
-        body { font-family: 'Noto Sans TC', 'Orbitron', sans-serif; background-color: #050505; color: white; overflow: hidden; height: 100vh; transition: all 0.3s ease; }
+        body { 
+            font-family: 'Noto Sans TC', 'Orbitron', sans-serif; 
+            background-color: #050505; 
+            color: white; 
+            overflow: hidden; 
+            height: 100vh; 
+            transition: background-color 0.3s ease; 
+        }
         
+        /* 這裡使用 var(--primary) 確保會跟著變數跳動 */
         .neon-border { border: 3px solid var(--primary); box-shadow: 0 0 20px var(--primary); transition: all 0.3s ease; }
         .neon-text { text-shadow: 0 0 10px var(--primary); color: var(--primary); transition: all 0.3s ease; }
         
@@ -105,14 +110,11 @@
                         statusLabel.innerText = "定位授權失敗";
                         statusLabel.classList.add('text-red-500');
                         reelStatus.innerText = "開定位，不然我不知道你要吃哪邊的土...";
-                        reelStatus.style.fontSize = "14px";
                         reelStatus.classList.add('text-red-500');
                         document.getElementById('spin-btn').innerText = "定位已關閉";
                     },
                     { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
                 );
-            } else {
-                reelStatus.innerText = "你的瀏覽器不支援定位";
             }
         };
 
@@ -187,7 +189,8 @@
                 btn.innerText = reasonPool[Math.floor(Math.random() * reasonPool.length)];
                 comment.innerText = insult;
                 
-                const mapLink = `http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(final.name)}&ll=${final.lat},${final.lon}`;
+                // 修正手機版導航連結，確保喚起 App
+                const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(final.name)}&query_place_id=${final.lat},${final.lon}`;
                 document.getElementById('maps-url').href = mapLink;
                 actions.classList.remove('hidden');
                 lastResult = { name: final.name, url: mapLink };
